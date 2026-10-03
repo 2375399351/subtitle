@@ -61,3 +61,12 @@
 ---
 
 *感谢原作者 [chen310](https://github.com/chen310) 的开源贡献。*
+
+
+docker run -d \
+  --name=subtitle \
+  --restart=unless-stopped \
+  -p 3030:3000 \
+  -v /mnt/user/appdata/subtitle/data:/app/data \
+  -e TZ=Asia/Shanghai \
+  subtitle:latest
