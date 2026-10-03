@@ -15,6 +15,11 @@ jobs:
       - name: Checkout repository
         uses: actions/checkout@v4
 
+      # 清掉旧的 GHA 构建缓存，避免 pnpm 12 的缓存层继续生效
+      - name: Clean buildx cache
+        run: |
+          docker buildx prune --all --force || true
+
       - name: Set up Docker Buildx
         uses: docker/setup-buildx-action@v3
 
@@ -26,31 +31,18 @@ jobs:
           push: false
           load: true
           tags: subtitle:latest
-          cache-from: type=gha
-          cache-to: type=gha,mode=max
+          # 暂时去掉 cache-from / cache-to，等首次成功后再加回来
+          # cache-from: type=gha
+          # cache-to: type=gha,mode=max
 
-      # 用 gzip 压缩镜像 tar，体积会小很多
       - name: Save image to tar.gz
         run: |
           docker save subtitle:latest | gzip > subtitle-image.tar.gz
           ls -lh subtitle-image.tar.gz
 
-      # 同时生成未压缩的 tar（可选，如果不需要可删除）
-      - name: Save image to plain tar
-        run: |
-          docker save subtitle:latest -o subtitle-image.tar
-          ls -lh subtitle-image.tar
-
-      - name: Upload compressed image (tar.gz)
+      - name: Upload compressed image
         uses: actions/upload-artifact@v4
         with:
           name: subtitle-image-targz
           path: subtitle-image.tar.gz
-          retention-days: 30
-
-      - name: Upload plain image (tar)
-        uses: actions/upload-artifact@v4
-        with:
-          name: subtitle-image-tar
-          path: subtitle-image.tar
           retention-days: 30
