@@ -14,6 +14,10 @@ RUN pnpm install --frozen-lockfile
 
 # 复制项目源码并构建
 COPY . .
+
+# 确保 public 目录存在（项目里没有 public 目录时，下一步 COPY 会失败）
+RUN mkdir -p /app/public
+
 RUN pnpm run build
 
 # ---------- 运行阶段 ----------
